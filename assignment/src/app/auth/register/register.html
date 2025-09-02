@@ -1,0 +1,20 @@
+<div class="container">
+  <div class="card">
+    <div class="card-header">Create an Account</div>
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" class="form-control" [(ngModel)]="username" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" class="form-control" [(ngModel)]="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-control" [(ngModel)]="password" required>
+      </div>
+      <button type="submit" class="btn btn-success w-100">Register</button>
+    </form>
+  </div>
+</div>
