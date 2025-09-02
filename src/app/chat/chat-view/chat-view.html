@@ -1,0 +1,76 @@
+<div class="chat-container">
+  
+  <div class="top-bar">
+    <div *ngFor="let group of myGroups" 
+         (click)="selectGroup(group)"
+         [class.active-group]="group.id === selectedGroup?.id"
+         class="group-tab">
+      <span>{{ group.name }}</span>
+      <button *ngIf="group.id === selectedGroup?.id" (click)="leaveGroup(group.id)" class="btn-leave">x</button>
+    </div>
+  </div>
+  <div class="account-settings-container">
+  <h4>Account Settings [temporary]</h4>
+  <p>
+    Welcome, {{ authService.currentUser?.username }}!
+  </p>
+  <button (click)="deleteMyAccount()" class="btn btn-danger">
+    Delete My Account
+  </button>
+  <p class="text-muted small mt-2">
+    Warning: This action is permanent and cannot be undone.
+  </p>
+</div>
+<hr> 
+
+  <div class="main-content">
+    
+    
+    <div class="sidebar">
+      <div class="channel-list">
+        <h4>Channels in {{ selectedGroup?.name }}</h4>
+        <ul>
+          <li *ngFor="let channel of channels" 
+              (click)="selectChannel(channel)"
+              [class.active-channel]="channel.id === selectedChannel?.id">
+            #{{ channel.name }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="discover-groups">
+        <h4>Discover Groups</h4>
+        <ul>
+          <li *ngFor="let group of allGroups" class="discover-item">
+            <span>{{ group.name }}</span>
+            <button (click)="requestTojoinGroup(group.id)" class="btn btn-sm btn-success">Join</button>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="user-list">
+        </div>
+    </div>
+
+   <div class="chat-area">
+    <div class="message-window">
+      <div *ngFor="let message of messages" class="message">
+        <strong>{{ message.username }}:</strong> {{ message.text }}
+      </div>
+    </div>
+
+    <form class="message-input" *ngIf="selectedChannel" (ngSubmit)="sendMessage()">
+      <input 
+        type="text" 
+        class="form-control"
+        [(ngModel)]="newMessageText" 
+        name="newMessageText" 
+        placeholder="Type your message in #{{ selectedChannel.name }}..."
+        autocomplete="off"
+      >
+      <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+  </div>
+
+</div>
+</div>

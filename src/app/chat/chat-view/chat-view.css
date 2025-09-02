@@ -1,0 +1,112 @@
+/* src/app/chat/chat-view/chat-view.component.css */
+
+/* Main container fills the whole screen */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: 'Courier New', Courier, monospace; /* Classic IRC font */
+}
+
+.top-bar {
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  flex-shrink: 0; /* Prevents the top bar from shrinking */
+}
+
+/* This container holds the sidebar and main chat area */
+.main-content {
+  display: flex;
+  flex-grow: 1; /* Allows this section to fill the remaining space */
+  overflow: hidden; /* Prevents scrolling on the main container */
+}
+
+/* The sidebar on the left */
+.sidebar {
+  width: 200px;
+  background-color: #f4f4f4;
+  border-right: 1px solid #ccc;
+  display: flex;
+  flex-direction: column; /* Stacks channel and user lists vertically */
+  flex-shrink: 0;
+}
+
+.channel-list, .user-list {
+  padding: 10px;
+  overflow-y: auto; /* Add scroll if lists get long */
+}
+.channel-list {
+  flex-basis: 50%; /* Top half */
+  border-bottom: 1px solid #ccc;
+}
+.user-list {
+  flex-basis: 50%; /* Bottom half */
+}
+
+h4 { margin-top: 0; }
+ul { list-style-type: none; padding: 0; }
+li.active { font-weight: bold; }
+
+/* The main chat area on the right */
+.chat-area {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-window {
+  flex-grow: 1; /* Fills available space */
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.message-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+.message-input input {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+.message-input button {
+  margin-left: 10px;
+}
+.active-group, .active-channel {
+  font-weight: bold;
+  background-color: #ddd;
+}
+/* src/app/chat/chat-view/chat-view.css */
+
+.top-bar {
+  display: flex;
+  background-color: #e9ebee;
+  border-bottom: 1px solid #dddfe2;
+  padding: 0 10px;
+  flex-shrink: 0;
+}
+
+/* This styles each group name to look like a tab */
+.top-bar div {
+  padding: 12px 15px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #4b4f56;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.top-bar div:hover {
+  background-color: #f5f6f7;
+}
+
+/* This style is applied to the currently selected group */
+.top-bar .active-group {
+  color: #3b5998;
+  border-bottom-color: #3b5998;
+}
