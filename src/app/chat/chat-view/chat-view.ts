@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ChatService } from '../../services/chat';
 import { Auth } from '../../services/auth';
 import { Router } from '@angular/router'; 
+import { User } from '../../models/user.model'
 
 @Component({
   selector: 'app-chat-view',
@@ -115,11 +116,17 @@ export class ChatView implements OnInit {
 
   }
 
-
+  getUsersInChannel(channelId: string): User[] {
+  return this.chatService.getUsers().filter(user => user.channels.includes(channelId));
+  } 
   selectGroup(group: any): void {
     this.selectedGroup = group;
     // when a group is selected, load its channels
-    this.channels = this.chatService.getChannelsForGroup(group.id);
+    
+    const currentUser = this.authService.currentUser;
+    if (!currentUser) return;
+
+    this.channels = this.chatService.getChannelsForUserInGroup(currentUser.id, group.id);
     // select the first channel by default
     if (this.channels.length > 0) {
       this.selectChannel(this.channels[0]);

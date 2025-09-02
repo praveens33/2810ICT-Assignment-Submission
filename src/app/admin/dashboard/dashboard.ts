@@ -19,6 +19,8 @@ import { Subscription } from 'rxjs';
 export class Dashboard implements OnInit, OnDestroy { 
   newGroupName: string = '';
   newChannelName: string = '';
+  newUsername: string = '';
+  newUserEmail: string = '';
 
   // properties to hold data from services
   allUsers: User[] = [];
@@ -74,6 +76,20 @@ export class Dashboard implements OnInit, OnDestroy {
   this.chatService.superAdminRemoveUserFromGroup(userId, groupId);
   alert(`User removed from group by Super Admin.`);
 }
+  superAdminCreateUser(): void {
+    if(this.newUsername && this.newUserEmail){
+      const success = this.chatService.superAdminCreateUser(this.newUsername, this.newUserEmail);
+
+      if(success){
+        alert('User was created successfully')
+        this.newUsername = '';
+        this.newUserEmail = '';
+
+      }
+    }else{
+      alert('Error: Username already taken');
+    }
+  }
 
 
  approveRequest(userIdToApprove: string, groupId: string): void {
@@ -207,4 +223,25 @@ demoteFromSuperAdmin(userId: string): void {
   getChannelsForGroup(groupId: string): any[] {
     return this.chatService.getChannelsForGroup(groupId);
   }
+  getChannelMembers(channelId: string): User[] {
+    return this.allUsers.filter(user => user.channels.includes(channelId));
+  }
+  getNonChannelMembers(groupId: string, channelId: string): User[] {
+  return this.getUsersInGroup(groupId).filter(user => !user.channels.includes(channelId));
+  }
+
+addUserToChannel(userId: string, channelId: string): void {
+  if (userId && channelId) {
+    this.chatService.addUserToChannel(userId, channelId);
+    }
+  }
+
+removeUserFromChannel(userId: string, channelId: string): void {
+  if (userId && channelId) {
+    this.chatService.removeUserFromChannel(userId, channelId);
+    }
+  }
+
+
+  
 }

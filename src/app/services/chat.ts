@@ -5,8 +5,10 @@ import { BehaviorSubject } from 'rxjs';
   interface User {
   id: string;
   username: string;
+  email: string;
   roles: string[];
   groups: string[];
+  channels: string[];
 }
 
 interface Group {
@@ -36,9 +38,9 @@ export class ChatService {
 
   public instanceId: number;
   private users: User[] = [
-    { id: 'u0', username: 'super', roles: ['Super Admin', 'User'], groups: ['g1', 'g2'] },
-    { id: 'u1', username: 'GroupAdminUser', roles: ['Group Admin', 'User'], groups: ['g1'] },
-    { id: 'u2', username: 'NormalUser', roles: ['User'], groups: ['g1', 'g2'] }
+    { id: 'u0', username: 'super', roles: ['Super Admin', 'User'], email: "email", groups: ['g1', 'g2'], channels: ['c1', 'c2', 'c3'] },
+    { id: 'u1', username: 'GroupAdminUser', roles: ['Group Admin', 'User'], email: "email2" ,groups: ['g1'],channels: ['c1', 'c2']},
+    { id: 'u2', username: 'NormalUser', roles: ['User'], email:"email3", groups: ['g1', 'g2'],channels: ['c2'] }
   ];
 
   private groups: Group[] = [
@@ -57,7 +59,7 @@ export class ChatService {
     { id: 'c3', name: 'planning', groupId: 'g2' }
   ];
   private bannedusers: User[] = [
-    { id: 'u2', username: 'NormalUser', roles: ['User'], groups: ['g1', 'g2'] }
+    { id: 'u2', username: 'NormalUser', roles: ['User'],  email: "email4", groups: ['g1', 'g2'], channels: [] }
   ];
   private readonly usersSource = new BehaviorSubject<User[]>(this.users);
   private readonly groupsSource = new BehaviorSubject<Group[]>(this.groups);
@@ -74,9 +76,15 @@ export class ChatService {
     //debugging 
     console.log(`%cChatService INSTANCE CREATED: ${this.instanceId}`, 'background: yellow; color: black; font-weight: bold;'); 
     const savedUsers = localStorage.getItem('chat_users');
-    if (savedUsers){
-      this.users = JSON.parse(savedUsers);
+    if(savedUsers){
+      let loadedUsers: User[] = JSON.parse(savedUsers);
+      loadedUsers.forEach(users =>{
+        console.warn('fixing user data');
+        users.channels = []; //add missing property
+      });
+      this.users = loadedUsers;
     }
+
     this.usersSource.next(this.users);
     const savedGroups = localStorage.getItem('chat_groups');
     if (savedGroups) {
@@ -125,6 +133,64 @@ export class ChatService {
   superAdminRemoveUserFromGroup(userId: string, groupId: string): void {
     this.removeUserFromGroup(userId, groupId);
   }
+  superAdminCreateUser(username: string, email: string): boolean {
+    //check if username exists
+    const usernameExists = this.getUsers().some(user => user.username.toLocaleLowerCase() === username.toLowerCase());
+    if (usernameExists){
+      console.error("username exists");
+      return false;
+    }
+    const newUser: User = {
+      id: `u${this.getUsers().length + 1}`, 
+      username: username,
+      email: email,
+      roles: ['User'],
+      groups: [],
+      channels: []      
+    };
+    const updatedUsers = [...this.getUsers(), newUser];
+    //update state and boradcaste
+    this.users = updatedUsers;
+    this.usersSource.next(this.users);
+    localStorage.setItem('chat_users', JSON.stringify(this.users));
+
+    console.log(`Super Admin created a new user: ${username}`);
+    return true; 
+  }
+  getChannelsForUserInGroup(userId: string, groupId: string): Channel[] {
+      const user = this.getUsers().find(u => u.id === userId);
+      if (!user || !user.channels) return [];
+
+      // filter  all channels to get only those that are in the specified group and the user is a member of
+      return this.channelsSource.getValue().filter(channel => 
+        channel.groupId === groupId && user.channels.includes(channel.id)
+      );
+  }
+  addUserToChannel(userId: string, channelId: string): void {
+    this.users = this.getUsers().map(user => {
+      // find user and make sure user is not already in the channel.
+      if (user.id === userId && !user.channels.includes(channelId)) {
+        return { ...user, channels: [...user.channels, channelId] };
+      }
+      return user;
+    });
+    this.usersSource.next(this.users);
+    localStorage.setItem('chat_users', JSON.stringify(this.users));
+    console.log(`User ${userId} added to channel ${channelId}`);
+  }
+  removeUserFromChannel(userId: string, channelId: string): void {
+    this.users = this.getUsers().map(user => {
+      if (user.id === userId) {
+        // return new user object with the channel filtered out
+        return { ...user, channels: user.channels.filter(cId => cId !== channelId) };
+      }
+      return user;
+    });
+    this.usersSource.next(this.users);
+    localStorage.setItem('chat_users', JSON.stringify(this.users));
+    console.log(`User ${userId} removed from channel ${channelId}`);
+  }
+
 
 
   promoteToGroupAdmin(userId: string): void {
@@ -240,6 +306,7 @@ export class ChatService {
     }
   }
 
+
   addAdminToGroup(userId: string, groupId: string): void {
     const user = this.users.find(u => u.id === userId);
     const group = this.groups.find(g => g.id === groupId);
@@ -285,6 +352,15 @@ export class ChatService {
   removeChannel(channelId: string): void {
     this.channels = this.channels.filter(c => c.id !== channelId);
     this.channelsSource.next(this.channels);
+    //update all users to remove all users from the deleted channel
+    this.users = this.getUsers().map(user => ({
+    ...user,
+      channels: user.channels.filter(cId => cId !== channelId)
+
+    }));
+     this.usersSource.next(this.users);
+    localStorage.setItem('chat_channels', JSON.stringify(this.channels)); 
+    localStorage.setItem('chat_users', JSON.stringify(this.users));
     console.log(`Channel ${channelId} removed`); 
   }
 
