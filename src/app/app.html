@@ -1,0 +1,28 @@
+<header>
+  <h1>My Chat App</h1>
+  <nav>
+  <ul>
+    <ng-container *ngIf="!authService.currentUser">
+      <li><a routerLink="/login">Login</a></li>
+      <li><a routerLink="/register">Register</a></li>
+    </ng-container>
+
+    <ng-container *ngIf="authService.currentUser">
+      <li><a routerLink="/chat">Chat</a></li>
+
+      <li *ngIf="authService.currentUser && (authService.currentUser.roles.includes('Super Admin') || authService.currentUser.roles.includes('Group Admin'))">
+        <a routerLink="/admin">Admin Dashboard</a>
+      </li>
+
+      <li>
+        <button (click)="logout()" class="btn btn-link">Logout</button>
+      </li>
+      
+    </ng-container>
+  </ul>
+</nav>
+</header>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
