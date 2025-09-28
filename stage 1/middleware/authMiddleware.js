@@ -1,7 +1,8 @@
+// middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
 
 module.exports = function(req, res, next) {
-  // getting token from header
+  // 1. Get token from the header
   const token = req.header('Authorization');
 
   // 2. Check if no token is present
