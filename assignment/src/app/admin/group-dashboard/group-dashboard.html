@@ -1,0 +1,171 @@
+<div *ngIf="authService.currentUser$ | async as currentUser" class="container-fluid mt-4 dashboard-container">
+  <div class="dashboard-header" *ngIf="currentUser">
+    
+    <div class="header-titles">
+      <h2>Admin Dashboard</h2>
+      <h3 class="text-muted">Group Management</h3>
+    </div>
+
+    <div class="header-actions">
+      <button (click)="goToUserSettings()" class="btn btn-secondary">Go to User Management</button>
+      <button (click)="goToChat()" class="btn btn-primary">Go  to Chat</button>
+    </div>
+
+  </div>
+
+  
+<!-- Group Management Panel -->
+    <div class="tab-pane fade" [class.show]="activeTab === 'groups'" [class.active]="activeTab === 'groups'" id="groups-panel" role="tabpanel" aria-labelledby="groups-tab">
+      <div class="master-detail-layout">
+        <!-- Left Column: Group List -->
+        <div class="group-list-container card">
+          <div class="card-body ">
+            <h5  >Create Group</h5>
+            <form (ngSubmit)="onCreateGroup()" class="create-group-form">
+              <input type="text" class="form-control form-control-sm" [(ngModel)]="newGroupName" name="newGroupName" placeholder="New group name...">
+              <button type="submit" class="btn btn-primary btn-sm ms-2" [disabled]="!newGroupName.trim()">Create</button>
+            </form>
+          </div>
+          <div class="card-body">
+            <h5>Search Groups</h5>
+            <input type="text" class="form-control mb-3" placeholder="Search groups..." [(ngModel)]="groupSearchTerm" (input)="onGroupSearchChange()">
+            
+            <p *ngIf="paginatedGroups.length === 0 && displayGroups.length > 0" class="text-muted">No groups found for "{{groupSearchTerm}}".</p>
+            <p *ngIf="displayGroups.length === 0" class="text-muted">You do not administer any groups.</p>
+
+            <ul class="list-group list-group-flush group-list">
+              <li *ngFor="let group of paginatedGroups; trackBy: trackByGroup"
+                  @listAnimation
+                  class="list-group-item list-group-item-action"
+                  (click)="selectGroup(group)"
+                  [class.active]="group._id === selectedGroup?._id">
+                {{ group.name }}
+              </li>
+            </ul>
+            
+            <nav *ngIf="groupTotalPages > 1" aria-label="Group pagination" class="mt-3">
+              <ul class="pagination pagination-sm justify-content-center">
+                <li class="page-item" [class.disabled]="groupCurrentPage === 1">
+                  <a class="page-link" href="#" (click)="goToGroupPage(groupCurrentPage - 1); $event.preventDefault()">Prev</a>
+                </li>
+                <li class="page-item" *ngFor="let page of groupPages" [class.active]="page === groupCurrentPage">
+                  <a class="page-link" href="#" (click)="goToGroupPage(page); $event.preventDefault()">{{ page }}</a>
+                </li>
+                <li class="page-item" [class.disabled]="groupCurrentPage === groupTotalPages">
+                  <a class="page-link" href="#" (click)="goToGroupPage(groupCurrentPage + 1); $event.preventDefault()">Next</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+
+        <!-- Right Column: Group Details -->
+        <div class="group-detail-container">
+          <div class="card" *ngIf="selectedGroup">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h4>{{ selectedGroup.name }}</h4>
+              <!-- 
+                Show delete button if:
+                1. User is a Super Admin.
+                2. User is a Group Admin AND they are the ONLY admin in this group.
+              -->
+              <button *ngIf="authService.isSuperAdmin(currentUser) || (selectedGroup.admins.includes(currentUser._id) && selectedGroup.admins.length === 1)" (click)="deleteGroup(selectedGroup._id)" class="btn btn-danger btn-sm">Delete Group</button>
+            </div>
+            <div class="card-body">
+              <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" [class.active]="selectedGroupActiveTab === 'members'" (click)="selectedGroupActiveTab = 'members'" type="button">Members ({{getUsersInGroup(selectedGroup._id).length}})</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" [class.active]="selectedGroupActiveTab === 'channels'" (click)="selectedGroupActiveTab = 'channels'" type="button">Channels ({{channelsForSelectedGroup.length}})</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" [class.active]="selectedGroupActiveTab === 'requests'" (click)="selectedGroupActiveTab = 'requests'" type="button">
+                    Requests <span *ngIf="selectedGroup.requests && selectedGroup.requests.length > 0" class="badge rounded-pill bg-danger">{{ selectedGroup.requests.length }}</span>
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" [class.active]="selectedGroupActiveTab === 'banned'" (click)="selectedGroupActiveTab = 'banned'" type="button">
+                    Banned <span *ngIf="selectedGroup.bannedUsers && selectedGroup.bannedUsers.length > 0" class="badge rounded-pill bg-dark">{{ selectedGroup.bannedUsers.length }}</span>
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" [class.active]="selectedGroupActiveTab === 'settings'" (click)="selectedGroupActiveTab = 'settings'" type="button">Settings</button>
+                </li>
+              </ul>
+              <div class="tab-content border border-top-0 p-3">
+                <!-- Members Pane -->
+                <div class="tab-pane fade" [class.show]="selectedGroupActiveTab === 'members'" [class.active]="selectedGroupActiveTab === 'members'" role="tabpanel">
+                  <h6 class="mb-3">Group Members</h6>
+                  <ul class="list-group">
+                    <li *ngIf="membersOfSelectedGroup.length === 0" @fadeIn class="list-group-item text-muted">This group has no members.</li>
+                    <li *ngFor="let user of membersOfSelectedGroup; trackBy: trackByUser" @listAnimation class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>{{ user.username }} <small class="text-muted" *ngIf="selectedGroup.admins.includes(user._id)">(Admin)</small></span>
+                      <div *ngIf="user._id !== currentUser._id">
+                        <button (click)="removeUserFromGroup(user._id, selectedGroup._id)" class="btn btn-outline-secondary btn-sm">Remove</button>
+                        <button (click)="banUser(user._id, selectedGroup._id)" class="btn btn-outline-danger btn-sm ms-2">Ban</button>
+                      </div>
+                    </li>
+                  </ul>
+                  <h6 class="mt-3">Add New Member</h6>
+                  <form #addMemberForm="ngForm" (ngSubmit)="addMember(addMemberForm.value.selectedUser, selectedGroup._id); addMemberForm.reset()" class="d-flex mt-2">
+                    <select name="selectedUser" ngModel class="form-select form-select-sm" required>
+                      <option [value]="null" disabled>Select a user to add...</option>
+                      <option *ngFor="let user of getNonMembers(selectedGroup._id)" [value]="user._id">{{ user.username }}</option>
+                    </select>
+                    <button type="submit" class="btn btn-secondary btn-sm ms-2" [disabled]="!addMemberForm.form.valid">Add</button>
+                  </form>
+                </div>
+                <!-- Channels Pane -->
+                <div class="tab-pane fade" [class.show]="selectedGroupActiveTab === 'channels'" [class.active]="selectedGroupActiveTab === 'channels'" role="tabpanel">
+                  <h6>Group Channels</h6>
+                  <ul class="list-group mb-3">
+                    <li *ngIf="channelsForSelectedGroup.length === 0" @fadeIn class="list-group-item text-muted">This group has no channels.</li>
+                    <li *ngFor="let channel of channelsForSelectedGroup; trackBy: trackByChannel" @listAnimation class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>#{{ channel.name }}</span>
+                      <button (click)="removeChannel(channel._id)" class="btn btn-outline-danger btn-sm">Remove</button>
+                    </li>
+                  </ul>
+                  <h6 class="mt-3">Add New Channel</h6>
+                  <form #channelForm="ngForm" (ngSubmit)="onCreateChannel(selectedGroup._id, channelForm.value.channelName); channelForm.reset()" class="d-flex mt-2">
+                    <input type="text" class="form-control form-control-sm" name="channelName" ngModel placeholder="New channel name..." required>
+                    <button type="submit" class="btn btn-primary btn-sm ms-2" [disabled]="!channelForm.form.valid">Add</button>
+                  </form>
+                </div>
+                <!-- Requests Pane -->
+                <div class="tab-pane fade" [class.show]="selectedGroupActiveTab === 'requests'" [class.active]="selectedGroupActiveTab === 'requests'" role="tabpanel">
+                  <h6>Pending Join Requests</h6>
+                  <ul class="list-group">
+                    <li *ngIf="!selectedGroup.requests || selectedGroup.requests.length === 0" @fadeIn class="list-group-item text-muted">No pending requests.</li>
+                    <li *ngFor="let userId of selectedGroup.requests; trackBy: trackByUserIdString" @listAnimation class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>{{ getUserById(userId)?.username }} wants to join</span>
+                      <div>
+                        <button (click)="approveRequest(userId, selectedGroup._id)" class="btn btn-sm btn-success">Approve</button>
+                        <button (click)="denyRequest(userId, selectedGroup._id)" class="btn btn-sm btn-danger ms-2">Deny</button>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <!-- Banned Users Pane -->
+                <div class="tab-pane fade" [class.show]="selectedGroupActiveTab === 'banned'" [class.active]="selectedGroupActiveTab === 'banned'" role="tabpanel">
+                  <h6>Banned Users</h6>
+                  <ul class="list-group">
+                    <li *ngIf="!selectedGroup.bannedUsers || selectedGroup.bannedUsers.length === 0" @fadeIn class="list-group-item text-muted">No users are banned from this group.</li>
+                    <li *ngFor="let userId of selectedGroup.bannedUsers; trackBy: trackByUserIdString" @listAnimation class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>{{ getUserById(userId)?.username }}</span>
+                      <button (click)="unban(userId, selectedGroup._id)" class="btn btn-sm btn-warning">Unban</button>
+                    </li>
+                  </ul>
+                </div>
+                
+            </div>
+          </div>
+          <div class="card" *ngIf="!selectedGroup">
+            <div class="card-body text-center text-muted p-5">
+              <p class="mb-0">Select a group from the list to see its details.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

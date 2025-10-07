@@ -1,0 +1,9 @@
+/* ==========================================================================
+   3. Card & List Styling
+   ========================================================================== */
+
+/* This rule styles the "Groups" title in the left card */
+.group-list-container .card-header h5 {
+  margin-bottom: 0.5rem; /* Adds space between "Groups" and the form below it */
+  margin-right: 0.5;
+}

@@ -1,0 +1,19 @@
+{
+  "devDependencies": {
+    "chai": "^6.0.1",
+    "chai-http": "^5.1.2",
+    "cross-env": "^10.0.0",
+    "mocha": "^11.7.2",
+    "mongodb-memory-server": "^10.2.1",
+    "sinon": "^21.0.0",
+    "socket.io-client": "^4.8.1",
+    "supertest": "^7.1.4"
+  },
+  "scripts": {
+    "start": "node chat-server/server.js",
+    "test": "cross-env NODE_ENV=test mocha --file chat-server/test/setup.js chat-server/test/auth.test.js chat-server/test/groups.test.js chat-server/test/users.test.js chat-server/test/channels.test.js chat-server/test/socket.test.js --exit"
+  },
+  "dependencies": {
+    "@angular/animations": "^20.3.3"
+  }
+}

@@ -1,0 +1,348 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /*  Color Palette */
+  --primary-color: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-gradient: linear-gradient(to right, #4f46e5, #6366f1);
+  --secondary-color: #4b5563;
+  --secondary-hover: #374151;
+  --danger-color: #ef4444;
+  --danger-hover: #dc2626;
+
+  /* Typography & Text */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --text-color: #111827; /* Darker for better contrast */
+  --text-muted: #6b7280;
+  --text-light: #ffffff;
+
+  /* Backgrounds & Borders */
+  --bg-body: #f9fafb;
+  --bg-card: #ffffff;
+  --border-color: #e5e7eb;
+  --border-color-light: #f3f4f6;
+
+  /* UI Elements */
+  --card-radius: 0.75rem; /* Slightly larger radius */
+  --card-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05), 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  --card-shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --spacing-unit: 1rem; /* 16px */
+  --transition-speed: 0.2s;
+}
+
+/* 2. Global Styles */
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-body);
+  color: var(--text-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  max-width: 960px;
+  margin: calc(var(--spacing-unit) * 2) auto;
+  padding: 0 var(--spacing-unit);
+}
+
+/* 3. Layout */
+.master-detail-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* 4. Header Styling */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dashboard-header h2, .header-titles h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* A container for right-aligned header buttons */
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 4. Card Styling */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--card-radius);
+  margin-bottom: 24px;
+  box-shadow: var(--card-shadow);
+  transition: all var(--transition-speed) ease;
+}
+
+.card-header {
+  padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5);
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.card:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+
+.card-body {
+  padding: calc(var(--spacing-unit) * 1.5);
+}
+
+h3, h5 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+.header-titles h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: calc(var(--spacing-unit) * 1.5) 0;
+}
+
+/* 5. Form & Input Styling */
+
+
+.form-control, .form-select {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.form-control:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+/* Search input with embedded icon */
+.search-input {
+  /* the SVG is a magnifying glass icon, embedded directly in the CSS */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="%236c757d"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: left 12px center;
+  background-size: 16px 16px;
+  padding-left: 40px; /* Make space for the icon */
+}
+
+/* 6. Button Styling */
+.btn {
+  display: inline-block;
+  border: none;
+  padding: 0.375rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary {
+  background-image: var(--primary-gradient);
+  color: var(--text-light);
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.1);
+}
+.btn-primary:hover { background-color: var(--primary-hover); }
+.btn-danger { background-color: var(--danger-color); color: var(--text-light); }
+.btn-danger:hover { background-color: var(--danger-hover); }
+.btn-secondary { background-color: var(--secondary-color); color: var(--text-light); }
+.btn-secondary:hover { background-color: var(--secondary-hover); }
+
+
+/* Ghost button style for less prominent actions */
+.btn-outline-danger {
+  background-color: transparent;
+  color: var(--danger-color);
+  border: 1px solid var(--danger-color);
+}
+.btn-outline-danger:hover {
+  background-color: var(--danger-color);
+  color: var(--text-light);
+  transform: translateY(-1px);
+  box-shadow: none;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.create-group-form {
+  display: flex;
+  align-items: center; /* Vertically centers the input and button */
+}
+
+/* 7. Tab Navigation */
+.nav-tabs {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.nav-link {
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: -1px; /* Aligns with the border */
+  transition: all var(--transition-speed) ease;
+}
+
+.nav-link:hover {
+  background-color: var(--bg-body);
+  border-bottom-color: var(--border-color);
+}
+
+.nav-link.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+  background-color: transparent;
+  font-weight: 600;
+}
+
+/* Adds needed space between the member/channel list and the "Add New..." section */
+.tab-pane .list-group {
+    margin-bottom: 2.5rem;
+}
+
+
+/* 7. Table Styling */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--spacing-unit);
+}
+
+.table th, .table td {
+  padding: 0.9rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.table th {
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background-color: var(--bg-body);
+}
+
+.table-hover > tbody > tr {
+  transition: background-color var(--transition-speed) ease;
+}
+.table-hover > tbody > tr:hover {
+  background-color: #f9fafb; /* Use the body background for a subtle hover */
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table td .btn {
+  margin-right: 0.5rem;
+}
+.table td .btn:last-child {
+  margin-right: 0;
+}
+
+
+/* 8. List Group Styling */
+.list-group {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1rem; /* Add horizontal padding */
+  border-bottom: 1px solid var(--border-color-light);
+  transition: all var(--transition-speed) ease;
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+}
+
+.list-group-item:hover {
+  background-color: var(--bg-body);
+  transform: translateX(4px);
+}
+
+.list-group-item.active {
+  background-color: #eef2ff; /* Light indigo */
+  color: var(--primary-color);
+  border-color: #eef2ff;
+  font-weight: 600;
+}
+
+/* 9. Pagination */
+.pagination .page-link {
+  color: var(--primary-color);
+  transition: all var(--transition-speed) ease;
+}
+.pagination .page-link:hover {
+  background-color: #eef2ff;
+}
+.pagination .page-item.active .page-link {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+.pagination .page-item.disabled .page-link {
+  color: var(--text-muted);
+}

@@ -1,64 +1,69 @@
+// src/app/services/auth.ts
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { User } from '../models/user.model';
-import { ChatService } from './chat'; // Import the ChatService
+import { Router } from '@angular/router';
+import { ChatService } from './chat'; 
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class Auth {
-  currentUser: User | null = null;
+  private serverUrl = 'http://localhost:3000/api';
+  private currentUserSubject: BehaviorSubject<User | null>;
+  public readonly currentUser$: Observable<User | null>;
 
-  constructor(private chatService: ChatService) {
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      this.currentUser = JSON.parse(storedUser);
-    }
+  constructor(private http: HttpClient, private router: Router, private chatService: ChatService) {
+    // Load user data from local storage on startup
+    const storedUser = localStorage.getItem('chat_user');
+    this.currentUserSubject = new BehaviorSubject<User | null>(storedUser ? JSON.parse(storedUser) : null);
+    this.currentUser$ = this.currentUserSubject.asObservable();
   }
 
-  login(email: string, password: string): boolean {
-    let userIdToFind: string | undefined;
-
-    if (email === 'super' && password === '123') {
-      userIdToFind = 'u0';
-    } else if (email === 'groupadmin@chat.app' && password === '123') {
-      userIdToFind = 'u1';
-    } else if (email === 'user@chat.app' && password === 'password123') {
-      userIdToFind = 'u2';
-    }
-
-    
-    if (userIdToFind) {
-      // find the user in the "database" 
-      this.currentUser = this.chatService.getUsers().find(u => u.id === userIdToFind) || null;
-
-      if (this.currentUser) {
-        localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-        console.log(`${this.currentUser.username} logged in successfully.`);
-        return true;
-      }
-    }
-
-    this.currentUser = null;
-    localStorage.removeItem('currentUser');
-    return false;
+  public get currentUser(): User | null {
+    return this.currentUserSubject.value;
   }
 
-  register(username: string, email: string, password: string): boolean {
-    console.log('Registering new user:', { username, email });
-    return true;
+  register(username: string, email: string, password: string): Observable<any> {
+    const userData = { username, email, password };
+    return this.http.post(`${this.serverUrl}/auth/register`, userData);
+  }
+  
+
+  login(email: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.serverUrl}/auth/login`, { email, password })
+      .pipe(
+        tap(response => {
+          if (response && response.token && response.user) {
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('chat_user', JSON.stringify(response.user));
+            this.currentUserSubject.next(response.user);
+            this.chatService.connectSocket(response.token);
+
+          }
+        })
+      );
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
   }
 
   logout(): void {
-    this.currentUser = null;
-    localStorage.removeItem('currentUser');
-    console.log('User logged out');
+    this.currentUserSubject.next(null);
+    localStorage.removeItem('chat_user');
+    localStorage.removeItem('token');
+    this.router.navigate(['/login']);
   }
 
   updateCurrentUser(updatedUser: User): void {
-    console.log('3. [Auth Service] updateCurrentUser was called with:', updatedUser);
+    this.currentUserSubject.next(updatedUser);
+    localStorage.setItem('chat_user', JSON.stringify(updatedUser));
+  }
 
-    this.currentUser = updatedUser;
-    localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-    console.log("current user session updated");
+  public isSuperAdmin(user: User | null): boolean {
+    return user?.roles.includes('Super Admin') ?? false;
   }
 }

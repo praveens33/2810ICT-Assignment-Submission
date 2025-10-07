@@ -12,7 +12,7 @@ export const adminGuard: CanActivateFn = (route, state) => {
   console.log('Admin Guard is checking this user:', user); 
 
 
-  // heck for both Super Admin OR Group Admin
+  //check for both Super Admin OR Group Admin
   if (user && (user.roles.includes('Super Admin') || user.roles.includes('Group Admin'))) {
     // if user has either role, allow access
     return true;

@@ -1,0 +1,32 @@
+<div *ngIf="!isInCall" class="waiting-container">
+  <div class="waiting-content text-center">
+    <h2 class="mb-3">Join the Global Video Call</h2>
+    <p>Your camera and microphone will be activated.</p>
+    <button class="btn btn-lg btn-success" (click)="joinCall()">
+      Join Call
+    </button>
+  </div>
+</div>
+
+<div *ngIf="isInCall" class="video-call-container">
+  <div class="video-grid">
+    <div class="video-wrapper local-video-wrapper">
+      <video [srcObject]="localStream" autoplay playsinline muted class="local-video"></video>
+      <span class="video-label">You</span>
+    </div>
+
+    <div *ngFor="let stream of remoteStreamsArray" class="video-wrapper remote-video-wrapper">
+      <video [srcObject]="stream" autoplay playsinline class="remote-video"></video>
+      <span class="video-label">Remote User</span>
+    </div>
+  </div>
+
+  <div class="call-controls">
+    <button class="btn control-btn btn-danger" (click)="leaveCall()">
+      End Call
+    </button>
+  </div>
+</div>
+
+<div *ngIf="!isInCall" class="waiting-container">
+  </div>

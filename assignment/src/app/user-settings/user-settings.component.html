@@ -1,0 +1,37 @@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header">
+            <h4>User Settings</h4>
+          </div>
+          <div class="card-body">
+            <div class="text-center">
+            <img [src]="authService.currentUser?.profilePicture ? serverBaseUrl + authService.currentUser?.profilePicture : 'assets/default-avatar.png'" 
+                 alt="Profile Picture" 
+                 class="profile-picture mb-3">
+            
+            <h5>{{ authService.currentUser?.username }}</h5>
+            <p class="text-muted">{{ authService.currentUser?.email }}</p>
+            </div>
+  
+            <hr>
+
+            <form (ngSubmit)="onUpload()">
+              <h5 class="mb-3">Change Profile Picture</h5>
+              <input type="file" (change)="onFileSelected($event)" class="form-control mb-3" accept="image/*">
+              <button type="submit" class="btn btn-primary" [disabled]="!selectedFile">Upload New Picture</button>
+            </form>
+
+            <hr>
+
+            <div class="danger-zone mt-4">
+                <h5 class="text-danger">Danger Zone</h5>
+                <p>Deleting your account is a permanent action and cannot be undone.</p>
+                <button (click)="deleteMyAccount()" class="btn btn-danger">Delete My Account</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

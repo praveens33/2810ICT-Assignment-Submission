@@ -1,0 +1,21 @@
+    "email": "thunder@example.com",
+    "password": "password123"
+
+
+
+group id: 68c14d9adf13d29509fba865
+user id: 68c150de453c5b622b8b5a95
+
+
+
+
+{
+    "email": "another@example.com",
+    "password": "password456"
+}
+
+
+{
+    "email": "thunder@cexample.com",
+    "password": "password123"
+}

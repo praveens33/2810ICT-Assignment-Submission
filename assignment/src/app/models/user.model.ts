@@ -1,6 +1,10 @@
 export interface User {
-  id: string;
+  _id: string;
   username: string;
-  roles: string[]; 
+  email: string;
+  roles: string[];
   groups: string[];
+  channels: string[];
+  profilePicture?: string;
+    version?: number;
 }
